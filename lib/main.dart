@@ -1,13 +1,16 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:camera/camera.dart';
 import 'package:created_by_618_abdo/GoogleAPIs/GoogleSpreadSheet.dart';
 import 'package:created_by_618_abdo/Login/LoginPage.dart';
+import 'package:created_by_618_abdo/face_recognition/face_recognition_screen.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/realtime_recognition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'DataFields/Settings/Create.dart';
 
-
+late List<CameraDescription> cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -18,10 +21,8 @@ void main() async {
         storageBucket: "pb-security-system-b3f0a.firebasestorage.app",
         messagingSenderId: "1013021365519",
         appId: "1:1013021365519:web:6b08ef5145b03af50a1a7a",
-        measurementId: "G-Y9F9SLNVPV"
-    ),
+        measurementId: "G-Y9F9SLNVPV"),
   );
-
 
   bool connected1 = await GoogleSheets.connectToAccountDetails();
   bool connected2 = await GoogleSheets.connectToReportList();
@@ -29,11 +30,10 @@ void main() async {
 
   if (!connected1 || !connected2 || !connected3) {
     print("Failed to connect to one or more Google Sheets. Exiting...");
-    return;
+    // return;
   }
 
 // Continue with your logic after successful connection
-
 
   const mainPrint = 'Create by 618 (Abdo)';
 
@@ -42,8 +42,7 @@ void main() async {
     return;
   }
 
-
-
+  cameras = await availableCameras();
   runApp(MyApp());
 }
 
@@ -52,7 +51,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     print('Create by 618 (Abdo)');
 
     return ScreenUtilInit(
@@ -63,7 +61,9 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: LoadingScreen(),
+          home: RealtimeRecognitionScreen(),
+          // FaceRecognitionScreen(),
+          // LoadingScreen(),
         );
       },
     );
