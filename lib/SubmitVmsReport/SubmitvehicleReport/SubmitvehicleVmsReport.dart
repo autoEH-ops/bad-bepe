@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -8,7 +7,6 @@ import 'package:gsheets/gsheets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import '../../GoogleAPIs/GoogleSpreadSheet.dart';
-import '../SubmitSupplierReport/web_image_utils.dart';
 import 'Vehicleservice.dart';
 
 class DrivePassPage extends StatefulWidget {
@@ -59,6 +57,7 @@ class _DrivePassPageState extends State<DrivePassPage> {
     super.initState();
     _fetchAllPassLists();
   }
+
   List<String> getPassStatus(String passType, String passName) {
     List<Map<String, String?>> passList;
 
@@ -85,10 +84,9 @@ class _DrivePassPageState extends State<DrivePassPage> {
     }
 
     // Find the pass in the selected list
-    final pass = passList.firstWhere(
-            (pass) => pass['pass'] == passName,
+    final pass = passList.firstWhere((pass) => pass['pass'] == passName,
         orElse: () => {} // Return an empty map if not found
-    );
+        );
 
     // Return both "Pass In" and "Pass Out" if present, otherwise default to "Pass In"
     List<String> statuses = [];
@@ -108,7 +106,6 @@ class _DrivePassPageState extends State<DrivePassPage> {
     return statuses;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,32 +115,32 @@ class _DrivePassPageState extends State<DrivePassPage> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildPassTypeButtons(),
-              SizedBox(height: 20),
-              if (selectedLocation == 'Pass In') ...[
-                _buildPassButtonsRow(),
-                if (showContractorList) _buildContractorList(),
-                if (showDutyList) _buildDutyList(),
-                if (showSupplierList) _buildSupplierList(),
-                if (showGuestList) _buildGuestList(), // Added Guest List
-              ],
-              if (selectedLocation == 'Pass Out') ...[
-                _buildPassButtonsRow(),
-                if (showContractorList) _buildContractorList(),
-                if (showDutyList) _buildDutyList(),
-                if (showSupplierList) _buildSupplierList(),
-                if (showGuestList) _buildGuestList(),
-              ],
-              SizedBox(height: 20),
-              if (showDriverList) _buildDriverList(),
-            ],
-          ),
-        ),
-      ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    _buildPassTypeButtons(),
+                    SizedBox(height: 20),
+                    if (selectedLocation == 'Pass In') ...[
+                      _buildPassButtonsRow(),
+                      if (showContractorList) _buildContractorList(),
+                      if (showDutyList) _buildDutyList(),
+                      if (showSupplierList) _buildSupplierList(),
+                      if (showGuestList) _buildGuestList(), // Added Guest List
+                    ],
+                    if (selectedLocation == 'Pass Out') ...[
+                      _buildPassButtonsRow(),
+                      if (showContractorList) _buildContractorList(),
+                      if (showDutyList) _buildDutyList(),
+                      if (showSupplierList) _buildSupplierList(),
+                      if (showGuestList) _buildGuestList(),
+                    ],
+                    SizedBox(height: 20),
+                    if (showDriverList) _buildDriverList(),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
@@ -164,7 +161,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: selectedLocation == 'Pass In' ? Colors.blue : Colors.grey,
+              backgroundColor:
+                  selectedLocation == 'Pass In' ? Colors.blue : Colors.grey,
             ),
             child: Text('Pass In'),
           ),
@@ -183,7 +181,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: selectedLocation == 'Pass Out' ? Colors.blue : Colors.grey,
+              backgroundColor:
+                  selectedLocation == 'Pass Out' ? Colors.blue : Colors.grey,
             ),
             child: Text('Pass Out'),
           ),
@@ -191,7 +190,6 @@ class _DrivePassPageState extends State<DrivePassPage> {
       ],
     );
   }
-
 
   Widget _buildPassButtonsRow() {
     return Row(
@@ -217,7 +215,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
           });
         }, showSupplierList),
         SizedBox(width: 10),
-        _buildPassButton('Guest Pass', () { // Added Guest Pass Button
+        _buildPassButton('Guest Pass', () {
+          // Added Guest Pass Button
           setState(() {
             showGuestList = !showGuestList;
             _collapseOtherPassLists('Guest');
@@ -227,7 +226,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
     );
   }
 
-  Widget _buildPassButton(String label, VoidCallback onPressed, bool isSelected) {
+  Widget _buildPassButton(
+      String label, VoidCallback onPressed, bool isSelected) {
     return Expanded(
       child: ElevatedButton(
         onPressed: onPressed,
@@ -269,7 +269,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
     });
   }
 
-  Widget _buildGuestList() { // Added Guest List Widget
+  Widget _buildGuestList() {
+    // Added Guest List Widget
     return _buildPassList('Guest Pass', selectedGuestPass, (value) {
       setState(() {
         selectedGuestPass = value;
@@ -279,7 +280,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
     });
   }
 
-  Widget _buildPassList(String passType, String? selectedPass, Function(String?) onChanged) {
+  Widget _buildPassList(
+      String passType, String? selectedPass, Function(String?) onChanged) {
     List<Map<String, String?>> list;
     switch (passType) {
       case 'Contractor Pass':
@@ -308,10 +310,12 @@ class _DrivePassPageState extends State<DrivePassPage> {
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-        items: list.map((pass) => DropdownMenuItem(
-          value: pass['pass'],
-          child: Text(pass['pass'] ?? ''),
-        )).toList(),
+        items: list
+            .map((pass) => DropdownMenuItem(
+                  value: pass['pass'],
+                  child: Text(pass['pass'] ?? ''),
+                ))
+            .toList(),
         onChanged: onChanged,
       ),
     );
@@ -342,11 +346,13 @@ class _DrivePassPageState extends State<DrivePassPage> {
     );
   }
 
-  Widget _buildDropdown(String title, String? selectedValue, Function(String?) onChanged) {
+  Widget _buildDropdown(
+      String title, String? selectedValue, Function(String?) onChanged) {
     return DropdownButtonFormField<String>(
       value: selectedValue,
       items: drivePassList.map((pass) {
-        return DropdownMenuItem(value: pass['pass'], child: Text(pass['pass'] ?? ''));
+        return DropdownMenuItem(
+            value: pass['pass'], child: Text(pass['pass'] ?? ''));
       }).toList(),
       onChanged: onChanged,
       decoration: InputDecoration(
@@ -360,13 +366,17 @@ class _DrivePassPageState extends State<DrivePassPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildTextField('Valid Malaysia Mobile Number', numberController, 'Enter Numbers'),
+        _buildTextField(
+            'Valid Malaysia Mobile Number', numberController, 'Enter Numbers'),
         SizedBox(height: 16),
-        _buildTextField('IC / Passport Number', icController, 'Enter IC Numbers'),
+        _buildTextField(
+            'IC / Passport Number', icController, 'Enter IC Numbers'),
         SizedBox(height: 16),
-        _buildTextField('Vehicle Plate', carPlateController, 'Enter Vehicle Plate'),
+        _buildTextField(
+            'Vehicle Plate', carPlateController, 'Enter Vehicle Plate'),
         SizedBox(height: 16),
-        _buildImagePickerButton('Vehicle Image', () => _pickImage('Driver'), driverImage),
+        _buildImagePickerButton(
+            'Vehicle Image', () => _pickImage('Driver'), driverImage),
         SizedBox(height: 16),
         ElevatedButton(
           onPressed: _submitForm,
@@ -376,7 +386,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, String hint) {
+  Widget _buildTextField(
+      String label, TextEditingController controller, String hint) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -409,7 +420,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
       contractorPassList = await drivePassVmsService.fetchContractorPassList();
       dutyPassList = await drivePassVmsService.fetchDutyPassList();
       supplierPassList = await drivePassVmsService.fetchSupplierPassList();
-      guestPassList = await drivePassVmsService.fetchGuestPassList(); // Fetch Guest Pass List
+      guestPassList = await drivePassVmsService
+          .fetchGuestPassList(); // Fetch Guest Pass List
 
       // Filter based on Pass In or Pass Out selection
       if (selectedLocation == 'Pass In') {
@@ -418,7 +430,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
         _filterPassLists('Pass In');
       }
 
-      GuestDrivereport = await drivePassVmsService.fetchGuestDriverReport(); // Fetch Guest Driver Report
+      GuestDrivereport = await drivePassVmsService
+          .fetchGuestDriverReport(); // Fetch Guest Driver Report
     } catch (e) {
       _showErrorDialog('Error fetching pass lists. Please try again.');
     } finally {
@@ -430,13 +443,22 @@ class _DrivePassPageState extends State<DrivePassPage> {
 
   void _filterPassLists(String status) {
     // Filter each list based on the pass status
-    drivePassList = drivePassList.where((pass) => pass['status'] == status || pass['status'] == null).toList();
-    contractorPassList = contractorPassList.where((pass) => pass['status'] == status || pass['status'] == null).toList();
-    dutyPassList = dutyPassList.where((pass) => pass['status'] == status || pass['status'] == null).toList();
-    supplierPassList = supplierPassList.where((pass) => pass['status'] == status || pass['status'] == null).toList();
-    guestPassList = guestPassList.where((pass) => pass['status'] == status || pass['status'] == null).toList();
+    drivePassList = drivePassList
+        .where((pass) => pass['status'] == status || pass['status'] == null)
+        .toList();
+    contractorPassList = contractorPassList
+        .where((pass) => pass['status'] == status || pass['status'] == null)
+        .toList();
+    dutyPassList = dutyPassList
+        .where((pass) => pass['status'] == status || pass['status'] == null)
+        .toList();
+    supplierPassList = supplierPassList
+        .where((pass) => pass['status'] == status || pass['status'] == null)
+        .toList();
+    guestPassList = guestPassList
+        .where((pass) => pass['status'] == status || pass['status'] == null)
+        .toList();
   }
-
 
   Future<void> _autoFillData(String passName) async {
     var lastData = await drivePassVmsService.getLastReportedData(passName);
@@ -449,10 +471,10 @@ class _DrivePassPageState extends State<DrivePassPage> {
     });
   }
 
-
   Future<void> _pickImage(String type) async {
     final picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       setState(() {
         if (type == 'Driver') {
@@ -462,7 +484,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
     }
   }
 
-  Widget _buildImagePickerButton(String title, VoidCallback onPressed, XFile? image) {
+  Widget _buildImagePickerButton(
+      String title, VoidCallback onPressed, XFile? image) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -474,13 +497,13 @@ class _DrivePassPageState extends State<DrivePassPage> {
         if (image != null)
           kIsWeb
               ? Image.network(
-            image.path,
-            height: 100,
-          )
+                  image.path,
+                  height: 100,
+                )
               : Image.file(
-            File(image.path),
-            height: 100,
-          ),
+                  File(image.path),
+                  height: 100,
+                ),
       ],
     );
   }
@@ -488,16 +511,12 @@ class _DrivePassPageState extends State<DrivePassPage> {
   Widget _displayImage(String imageUrlOrPath) {
     if (kIsWeb && imageUrlOrPath.startsWith('data:image')) {
       // Web: Display Base64-encoded image
-      return Image.memory(base64Decode(imageUrlOrPath.split(',').last), height: 100);
+      return Image.memory(base64Decode(imageUrlOrPath.split(',').last),
+          height: 100);
     } else {
       // Non-web: Display image file
       return Image.file(File(imageUrlOrPath), height: 100);
     }
-  }
-
-  Future<String> _getImageUrl(XFile image) async {
-    final bytes = await image.readAsBytes();
-    return createObjectUrlFromBlob(bytes);
   }
 
   // Define the _updatePassStatus method
@@ -508,10 +527,10 @@ class _DrivePassPageState extends State<DrivePassPage> {
       // Call the service to update the pass status (this depends on your service method)
       try {
         await drivePassVmsService.updatePassStatus(
-            [passName!],  // Pass name for each type (ensure it's not null)
-            selectedLocation!,  // Current location or status for each pass
-            passType  // Pass type (e.g., Drive Pass, Contractor Pass, etc.)
-        );
+            [passName!], // Pass name for each type (ensure it's not null)
+            selectedLocation!, // Current location or status for each pass
+            passType // Pass type (e.g., Drive Pass, Contractor Pass, etc.)
+            );
         print("Pass status updated successfully for $passName");
       } catch (e) {
         print("Error updating pass status for $passName: $e");
@@ -521,7 +540,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
 
   Future<void> _submitForm() async {
     if ((currentPassType == 'Drive Pass' && selectedDrivePass == null) ||
-        (currentPassType == 'Contractor Pass' && selectedContractorPass == null) ||
+        (currentPassType == 'Contractor Pass' &&
+            selectedContractorPass == null) ||
         (currentPassType == 'Duty Pass' && selectedDutyPass == null) ||
         (currentPassType == 'Supplier Pass' && selectedSupplierPass == null) ||
         (currentPassType == 'Guest Pass' && selectedGuestPass == null) ||
@@ -540,15 +560,18 @@ class _DrivePassPageState extends State<DrivePassPage> {
         imagesToUpload.add(driverImage!);
       }
 
-      List<String> imageLinks = await drivePassVmsService.uploadImagesToDrive(imagesToUpload);
-      String currentDateTime = DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
+      List<String> imageLinks =
+          await drivePassVmsService.uploadImagesToDrive(imagesToUpload);
+      String currentDateTime =
+          DateFormat('dd/MM/yyyy HH:mm:ss').format(DateTime.now());
 
       // Prepare the pass type combination (if multiple passes are selected)
       String combinedPassTypes = '';
       if (selectedDrivePass != null && selectedDrivePass!.isNotEmpty) {
         combinedPassTypes += 'Drive Pass, ';
       }
-      if (selectedContractorPass != null && selectedContractorPass!.isNotEmpty) {
+      if (selectedContractorPass != null &&
+          selectedContractorPass!.isNotEmpty) {
         combinedPassTypes += 'Contractor Pass, ';
       }
       if (selectedDutyPass != null && selectedDutyPass!.isNotEmpty) {
@@ -563,7 +586,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
 
       // Remove trailing comma and space
       if (combinedPassTypes.isNotEmpty) {
-        combinedPassTypes = combinedPassTypes.substring(0, combinedPassTypes.length - 2);
+        combinedPassTypes =
+            combinedPassTypes.substring(0, combinedPassTypes.length - 2);
       } else {
         combinedPassTypes = 'No Pass Selected';
       }
@@ -571,8 +595,17 @@ class _DrivePassPageState extends State<DrivePassPage> {
       // Prepare the data to save
       List<Object?> rowData = [
         combinedPassTypes, // Save all pass types as a combined string
-        selectedDrivePass ?? selectedContractorPass ?? selectedDutyPass ?? selectedSupplierPass ?? selectedGuestPass ?? '',
-        selectedContractorPass ?? selectedDutyPass ?? selectedSupplierPass ?? selectedGuestPass ?? '',
+        selectedDrivePass ??
+            selectedContractorPass ??
+            selectedDutyPass ??
+            selectedSupplierPass ??
+            selectedGuestPass ??
+            '',
+        selectedContractorPass ??
+            selectedDutyPass ??
+            selectedSupplierPass ??
+            selectedGuestPass ??
+            '',
         selectedLocation,
         numberController.text,
         icController.text,
@@ -600,7 +633,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
         print("Updating Drive Pass Status");
         await _updatePassStatus(selectedDrivePass, 'Drive Pass');
       }
-      if (selectedContractorPass != null && selectedContractorPass!.isNotEmpty) {
+      if (selectedContractorPass != null &&
+          selectedContractorPass!.isNotEmpty) {
         print("Updating Contractor Pass Status");
         await _updatePassStatus(selectedContractorPass, 'Contractor Pass');
       }
@@ -617,7 +651,8 @@ class _DrivePassPageState extends State<DrivePassPage> {
         await _updatePassStatus(selectedGuestPass, 'Guest Pass');
       }
 
-      _showSuccessDialog('Data submitted successfully with Report ID: $reportId!');
+      _showSuccessDialog(
+          'Data submitted successfully with Report ID: $reportId!');
       _fetchAllPassLists();
       _resetForm();
     } catch (e, stack) {
@@ -629,10 +664,6 @@ class _DrivePassPageState extends State<DrivePassPage> {
       _showErrorDialog('Failed to submit data. Please try again.\nError: $e');
     }
   }
-
-
-
-
 
   void _showErrorDialog(String message) {
     showDialog(
@@ -710,4 +741,3 @@ class _DrivePassPageState extends State<DrivePassPage> {
     });
   }
 }
-

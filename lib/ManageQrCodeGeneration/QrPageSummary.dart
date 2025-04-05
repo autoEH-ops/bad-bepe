@@ -1,6 +1,6 @@
-import 'dart:html' as html;
 import 'dart:io';
 import 'dart:ui' as ui;
+import 'qr_image_handler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,9 +10,9 @@ import '/GoogleAPIs/GoogleDrive.dart';
 import '/GoogleAPIs/SwitchyIo.dart';
 import 'QrGeneratorService.dart';
 
-
 class QrSummary extends StatelessWidget {
-  const QrSummary({super.key,
+  const QrSummary({
+    super.key,
     required this.icNum,
     required this.name,
     required this.number,
@@ -31,7 +31,6 @@ class QrSummary extends StatelessWidget {
   final String carPlate;
   final String startDate;
   final String endDate;
-
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +86,7 @@ class QrSummary extends StatelessWidget {
 
                               return const AlertDialog(
                                 title:
-                                Center(child: Text('Generating QR Code')),
+                                    Center(child: Text('Generating QR Code')),
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -145,28 +144,7 @@ class QrSummary extends StatelessWidget {
     if (byteData != null) {
       Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      if (kIsWeb) {
-        // Web environment: Use byte data directly for uploading
-        print('QR code image generated for Web');
-
-        // Create a Blob URL for local display, but use the bytes for Google Drive
-        final blob = html.Blob([pngBytes], 'image/png');
-        final imageUrl = html.Url.createObjectUrlFromBlob(blob);
-        print('QR code image URL: $imageUrl');
-
-        // Use byte data for Google Drive upload
-        images.add(XFile.fromData(pngBytes,
-            mimeType: 'image/png', name: 'qr_code.png'));
-      } else {
-        // Non-web (Mobile/Desktop): Save as file and upload
-        final directory = await getApplicationCacheDirectory();
-        final file = File('${directory.path}/qr.png');
-        await file.writeAsBytes(pngBytes);
-
-        print('QR code image saved at ${file.path}');
-
-        images.add(XFile(file.path));
-      }
+      await handleQrImageForPlatform(pngBytes, images);
 
       // Proceed with uploading the images
       List<String> googleDriveImages = await googleDrive.getGoogleDriveFilesUrl(
@@ -178,12 +156,12 @@ class QrSummary extends StatelessWidget {
 
       for (int i = 0; i < googleDriveImages.length; i++) {
         newImagesList[i] =
-        "https://lh3.googleusercontent.com/d/${googleDriveImages[i]}";
+            "https://lh3.googleusercontent.com/d/${googleDriveImages[i]}";
       }
 
       for (int i = 0; i < googleDriveImages.length; i++) {
         googleDriveImages[i] =
-        "https://drive.google.com/file/d/${googleDriveImages[i]}/view?usp=sharing";
+            "https://drive.google.com/file/d/${googleDriveImages[i]}/view?usp=sharing";
       }
 
       List<String> switchIoImages = await switchyIo.shortenURLs(newImagesList);
@@ -193,12 +171,12 @@ class QrSummary extends StatelessWidget {
 
       // Send WhatsApp Message
       qrGeneratorService.sendWhatsAppMessage(
-        msg: "QR Link: $list_2\nName: $name\nPhone Number: $number\nIC Number: $icNum\nCar Plate: $carPlate\nStart Date: $startDate\nEnd Date: $endDate",
+        msg:
+            "QR Link: $list_2\nName: $name\nPhone Number: $number\nIC Number: $icNum\nCar Plate: $carPlate\nStart Date: $startDate\nEnd Date: $endDate",
         phoneNumber: number,
         email: email,
         attachments: image,
       );
-
 
       qrGeneratorService.addQrCodes(
         qr: "$name|${number ?? ""}|$startDate|$endDate|$icNum|$currentTime",

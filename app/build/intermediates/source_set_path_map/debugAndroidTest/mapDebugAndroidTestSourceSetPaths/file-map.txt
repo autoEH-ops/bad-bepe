@@ -1,4 +1,0 @@
-com.example.Security_System.test.app-androidTest-0 D:\618 files\test sh\New folder\redesign\app\build\generated\res\resValues\androidTest\debug
-com.example.Security_System.test.app-mergeDebugAndroidTestResources-1 D:\618 files\test sh\New folder\redesign\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\merged.dir
-com.example.Security_System.test.app-mergeDebugAndroidTestResources-2 D:\618 files\test sh\New folder\redesign\app\build\intermediates\incremental\debugAndroidTest\mergeDebugAndroidTestResources\stripped.dir
-com.example.Security_System.test.app-debugAndroidTest-3 D:\618 files\test sh\New folder\redesign\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources

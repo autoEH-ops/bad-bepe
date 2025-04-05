@@ -1,27 +1,25 @@
-import 'dart:html' as html;
-import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../ManageQrCodeGeneration/QrGeneratorService.dart';
 import '/GoogleAPIs/GoogleDrive.dart';
 import '/GoogleAPIs/SwitchyIo.dart';
 import 'QrGeneratorService.dart';
-
+import 'qr_image_handler.dart';
 
 class QrvSummary extends StatelessWidget {
   const QrvSummary(
       {super.key,
-        required this.icNum,
-        required this.name,
-        required this.number,
-        required this.carPlate,
-        required this.startDate,
-        required this.endDate, required this.email, required this.category});
-
+      required this.icNum,
+      required this.name,
+      required this.number,
+      required this.carPlate,
+      required this.startDate,
+      required this.endDate,
+      required this.email,
+      required this.category});
 
   final String email;
   final String category; // Ensure this is here
@@ -84,7 +82,7 @@ class QrvSummary extends StatelessWidget {
 
                               return const AlertDialog(
                                 title:
-                                Center(child: Text('Generating QR Code')),
+                                    Center(child: Text('Generating QR Code')),
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
@@ -142,28 +140,7 @@ class QrvSummary extends StatelessWidget {
     if (byteData != null) {
       Uint8List pngBytes = byteData.buffer.asUint8List();
 
-      if (kIsWeb) {
-        // Web environment: Use byte data directly for uploading
-        print('QR code image generated for Web');
-
-        // Create a Blob URL for local display, but use the bytes for Google Drive
-        final blob = html.Blob([pngBytes], 'image/png');
-        final imageUrl = html.Url.createObjectUrlFromBlob(blob);
-        print('QR code image URL: $imageUrl');
-
-        // Use byte data for Google Drive upload
-        images.add(XFile.fromData(pngBytes,
-            mimeType: 'image/png', name: 'qr_code.png'));
-      } else {
-        // Non-web (Mobile/Desktop): Save as file and upload
-        final directory = await getApplicationCacheDirectory();
-        final file = File('${directory.path}/qr.png');
-        await file.writeAsBytes(pngBytes);
-
-        print('QR code image saved at ${file.path}');
-
-        images.add(XFile(file.path));
-      }
+      await handleQrImageForPlatform(pngBytes, images);
 
       // Proceed with uploading the images
       List<String> googleDriveImages = await googleDrive.getGoogleDriveFilesUrl(
@@ -175,12 +152,12 @@ class QrvSummary extends StatelessWidget {
 
       for (int i = 0; i < googleDriveImages.length; i++) {
         newImagesList[i] =
-        "https://lh3.googleusercontent.com/d/${googleDriveImages[i]}";
+            "https://lh3.googleusercontent.com/d/${googleDriveImages[i]}";
       }
 
       for (int i = 0; i < googleDriveImages.length; i++) {
         googleDriveImages[i] =
-        "https://drive.google.com/file/d/${googleDriveImages[i]}/view?usp=sharing";
+            "https://drive.google.com/file/d/${googleDriveImages[i]}/view?usp=sharing";
       }
 
       List<String> switchIoImages = await switchyIo.shortenURLs(newImagesList);
@@ -190,7 +167,8 @@ class QrvSummary extends StatelessWidget {
 
       // Send WhatsApp Message
       qrvGeneratorService.sendWhatsAppMessage(
-        msg: "QR Link: $list_2\nName: $name\nPhone Number: $number\nIC Number: $icNum\nCar Plate: $carPlate\nStart Date: $startDate\nEnd Date: $endDate",
+        msg:
+            "QR Link: $list_2\nName: $name\nPhone Number: $number\nIC Number: $icNum\nCar Plate: $carPlate\nStart Date: $startDate\nEnd Date: $endDate",
         phoneNumber: number,
         email: email,
         attachments: image,
@@ -208,7 +186,9 @@ class QrvSummary extends StatelessWidget {
         googleImage: list_1,
         switchyImage: list_2,
         email: email,
-        category: category, status2: '', passType: '',
+        category: category,
+        status2: '',
+        passType: '',
       );
     }
   }
