@@ -34,10 +34,12 @@ dependencies:
   tflite_flutter: ^0.11.0
   sqflite: ^2.4.1
   camera: ^0.10.5+9
-
+  supabase_flutter: ^2.8.4
   http: any
   flutter_screenutil: any
   url_launcher: any
+  flutter_dotenv: ^5.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -65,3 +67,4 @@ flutter:
     - assets/
     - assets/icon/logo.png
     - assets/credentials.json
+    - .env

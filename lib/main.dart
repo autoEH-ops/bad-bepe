@@ -4,11 +4,15 @@ import 'package:camera/camera.dart';
 import 'package:created_by_618_abdo/GoogleAPIs/GoogleSpreadSheet.dart';
 import 'package:created_by_618_abdo/Login/LoginPage.dart';
 import 'package:created_by_618_abdo/face_recognition/face_recognition_screen.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_admin_page.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_registration_screen.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/realtime_recognition.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'DataFields/Settings/Create.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 late List<CameraDescription> cameras;
 void main() async {
@@ -24,6 +28,22 @@ void main() async {
         measurementId: "G-Y9F9SLNVPV"),
   );
 
+  try {
+    await dotenv.load(fileName: ".env");
+    debugPrint(".env is initialized");
+  } catch (e) {
+    throw ".env is not initialized: $e";
+  }
+  try {
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+    );
+    debugPrint("Connected to Supabase");
+  } catch (e) {
+    throw "Connection failed: $e";
+  }
+
   bool connected1 = await GoogleSheets.connectToAccountDetails();
   bool connected2 = await GoogleSheets.connectToReportList();
   bool connected3 = await GoogleSheets.connectToDataList();
@@ -35,7 +55,7 @@ void main() async {
 
 // Continue with your logic after successful connection
 
-  const mainPrint = 'Create by 618 (Abdo)';
+  const mainPrint = 'Create by 629 (Izzul)';
 
   if (!checkPrintIntegrity(mainPrint)) {
     print("Print statement in main.dart altered! Exiting...");
@@ -51,7 +71,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('Create by 618 (Abdo)');
+    print('Create by 629 (Izzul)');
 
     return ScreenUtilInit(
       designSize: Size(375, 812),
@@ -61,7 +81,8 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: RealtimeRecognitionScreen(),
+          home: AttendanceAdminPage(),
+          // RealtimeRecognitionScreen(),
           // FaceRecognitionScreen(),
           // LoadingScreen(),
         );

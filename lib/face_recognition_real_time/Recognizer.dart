@@ -2,18 +2,24 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
-import '../DB/DatabaseHelper.dart';
-import 'Recognition.dart';
+import 'DB/SupabaseDbHelper.dart';
+import 'model/Recognition.dart';
 
 class Recognizer {
   late Interpreter interpreter;
   late InterpreterOptions _interpreterOptions;
   static const int WIDTH = 112;
   static const int HEIGHT = 112;
-  final dbHelper = DatabaseHelper();
-  Map<String, Recognition> registered = Map();
+  final dbHelper = SupabaseDbHelper();
+  Map<String, Recognition> registered = {};
+
+  static const String _tableName = 'recognition';
+  static const String _columnName = 'name';
+  static const String _columnEmbedding = 'embedding';
+
   @override
   String get modelName => 'assets/mobile_face_net.tflite';
 
@@ -28,22 +34,22 @@ class Recognizer {
   }
 
   initDB() async {
-    await dbHelper.init();
     loadRegisteredFaces();
   }
 
   void loadRegisteredFaces() async {
     registered.clear();
-    final allRows = await dbHelper.queryAllRows();
+    final allRows = await dbHelper.queryAllRows('recognition');
     // debugPrint('query all rows:');
     for (final row in allRows) {
-      //  debugPrint(row.toString());
-      print(row[DatabaseHelper.columnName]);
-      String name = row[DatabaseHelper.columnName];
-      List<dynamic> jsonList = jsonDecode(row[DatabaseHelper.columnEmbedding]);
+      debugPrint("This is the row ${row.toString()}");
+      assert(
+          row[_columnName] != null, "Column name is null: ${row[_columnName]}");
+      String name = row[_columnName];
+      List<dynamic> jsonList = jsonDecode(row[_columnEmbedding]);
       List<double> embd = jsonList.map((e) => e as double).toList();
       Recognition recognition =
-          Recognition(row[DatabaseHelper.columnName], Rect.zero, embd, 0);
+          Recognition(row[_columnName], Rect.zero, embd, 0);
       registered.putIfAbsent(name, () => recognition);
       print("R=" + name);
     }
@@ -53,11 +59,11 @@ class Recognizer {
     String embeddingJson = jsonEncode(embedding);
     // row to insert
     Map<String, dynamic> row = {
-      DatabaseHelper.columnName: name,
-      DatabaseHelper.columnEmbedding: embeddingJson,
+      _columnName: name,
+      _columnEmbedding: embeddingJson,
     };
-    final id = await dbHelper.insert(row);
-    print('inserted row id: $id');
+    await dbHelper.insert(_tableName, row);
+    print('Succesfully inserted face: $name in $_tableName}');
     loadRegisteredFaces();
   }
 

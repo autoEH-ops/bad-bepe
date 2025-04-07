@@ -11,17 +11,19 @@ import 'package:image/image.dart' as img;
 import '../main.dart';
 import 'model/Recognition.dart';
 
-class RealtimeRecognitionScreen extends StatefulWidget {
-  const RealtimeRecognitionScreen({super.key});
+class AttendanceRegistrationScreen extends StatefulWidget {
+  const AttendanceRegistrationScreen({super.key});
 
   @override
-  State<RealtimeRecognitionScreen> createState() =>
-      _RealtimeRecognitionScreenState();
+  State<AttendanceRegistrationScreen> createState() =>
+      _AttendanceRegistrationScreenState();
 }
 
-class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
+class _AttendanceRegistrationScreenState
+    extends State<AttendanceRegistrationScreen> {
   late CameraController controller;
   bool isBusy = false;
+  bool isRegistrationComplete = false;
   late Size size;
   late CameraDescription description = cameras[1];
   CameraLensDirection camDirec = CameraLensDirection.front;
@@ -65,7 +67,13 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
   //TODO close all resources
   @override
   void dispose() {
-    controller?.dispose();
+    if (controller.value.isInitialized) {
+      if (controller.value.isStreamingImages) {
+        controller.stopImageStream();
+      }
+      controller.dispose();
+    }
+    recognizer.close();
     super.dispose();
   }
 
@@ -183,7 +191,16 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
                     recognizer.registerFaceInDB(
                         textEditingController.text, recognition.embeddings);
                     textEditingController.text = "";
-                    Navigator.pop(context);
+
+                    Future.delayed(Duration.zero, () {
+                      if (mounted && Navigator.of(context).canPop()) {
+                        Navigator.of(context).pop(); // close dialog
+                        if (Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop(); // close screen if needed
+                        }
+                      }
+                    });
+
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Face Registered"),
                     ));
@@ -285,20 +302,6 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
         // Convert YUV_420_888 to NV21 format
         final yuvBytes = _yuv420ToNv21(frame!);
 
-        // if (camDirec == CameraLensDirection.front) {
-        //   // Flip the image horizontally
-        //   final flippedYuvBytes = _flipImageHorizontally(yuvBytes);
-        //   return InputImage.fromBytes(
-        //     bytes: flippedYuvBytes,
-        //     metadata: InputImageMetadata(
-        //       size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
-        //       rotation: rotation,
-        //       format: InputImageFormat.nv21,
-        //       bytesPerRow: frame!.planes[0].bytesPerRow,
-        //     ),
-        //   );
-        // }
-
         return InputImage.fromBytes(
           bytes: yuvBytes,
           metadata: InputImageMetadata(
@@ -312,20 +315,6 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
         // iOS
         if (frame!.planes.length != 1) return null;
         final plane = frame!.planes.first;
-
-        // if (camDirec == CameraLensDirection.front) {
-        //   // Flip the image horizontally (for iOS as well)
-        //   final flippedBytes = _flipImageHorizontally(plane.bytes);
-        //   return InputImage.fromBytes(
-        //     bytes: flippedBytes,
-        //     metadata: InputImageMetadata(
-        //       size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
-        //       rotation: rotation,
-        //       format: InputImageFormat.bgra8888,
-        //       bytesPerRow: plane.bytesPerRow,
-        //     ),
-        //   );
-        // }
 
         return InputImage.fromBytes(
           bytes: plane.bytes,
@@ -341,46 +330,6 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
       debugPrint("Error in getInputImage: $e");
       return null;
     }
-    // final camera =
-    //     camDirec == CameraLensDirection.front ? cameras[1] : cameras[0];
-    // final sensorOrientation = camera.sensorOrientation;
-
-    // InputImageRotation? rotation;
-    // if (Platform.isIOS) {
-    //   rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
-    // } else if (Platform.isAndroid) {
-    //   var rotationCompensation =
-    //       _orientations[controller!.value.deviceOrientation];
-    //   if (rotationCompensation == null) return null;
-    //   if (camera.lensDirection == CameraLensDirection.front) {
-    //     // front-facing
-    //     rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
-    //   } else {
-    //     // back-facing
-    //     rotationCompensation =
-    //         (sensorOrientation - rotationCompensation + 360) % 360;
-    //   }
-    //   rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
-    // }
-    // if (rotation == null) return null;
-
-    // final format = InputImageFormatValue.fromRawValue(frame!.format.raw);
-    // if (format == null ||
-    //     (Platform.isAndroid && format != InputImageFormat.nv21) ||
-    //     (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
-
-    // if (frame!.planes.length != 1) return null;
-    // final plane = frame!.planes.first;
-
-    // return InputImage.fromBytes(
-    //   bytes: plane.bytes,
-    //   metadata: InputImageMetadata(
-    //     size: Size(frame!.width.toDouble(), frame!.height.toDouble()),
-    //     rotation: rotation,
-    //     format: format,
-    //     bytesPerRow: plane.bytesPerRow,
-    //   ),
-    // );
   }
 
   Uint8List _yuv420ToNv21(CameraImage image) {
@@ -414,24 +363,6 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
     return nv21;
   }
 
-  // TODO Show rectangles around detected faces
-  Widget buildResult() {
-    if (_scanResults == null ||
-        controller == null ||
-        !controller.value.isInitialized) {
-      return const Center(child: Text('Camera is not initialized'));
-    }
-    final Size imageSize = Size(
-      controller.value.previewSize!.height,
-      controller.value.previewSize!.width,
-    );
-    CustomPainter painter =
-        FaceDetectorPainter(imageSize, _scanResults, camDirec);
-    return CustomPaint(
-      painter: painter,
-    );
-  }
-
   //TODO toggle camera direction
   void _toggleCameraDirection() async {
     if (camDirec == CameraLensDirection.back) {
@@ -453,14 +384,11 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
   Widget build(BuildContext context) {
     List<Widget> stackChildren = [];
     size = MediaQuery.of(context).size;
+
     if (controller != null) {
       //TODO View for displaying the live camera footage
       stackChildren.add(
-        Positioned(
-          top: 0.0,
-          left: 0.0,
-          width: size.width,
-          height: size.height,
+        Positioned.fill(
           child: Container(
             child: (controller.value.isInitialized)
                 ? AspectRatio(
@@ -471,133 +399,43 @@ class _RealtimeRecognitionScreenState extends State<RealtimeRecognitionScreen> {
           ),
         ),
       );
-
-      //TODO View for displaying rectangles around detected aces
-      stackChildren.add(
-        Positioned(
-            top: 0.0,
-            left: 0.0,
-            width: size.width,
-            height: size.height,
-            child: buildResult()),
-      );
     }
-
-    //TODO View for displaying the bar to switch camera direction or for registering faces
-    stackChildren.add(Positioned(
-      top: size.height - 140,
-      left: 0,
-      width: size.width,
-      height: 80,
-      child: Card(
-        margin: const EdgeInsets.only(left: 20, right: 20),
-        color: Colors.blue,
-        child: Center(
-          child: Container(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.cached,
-                        color: Colors.white,
-                      ),
-                      iconSize: 40,
-                      color: Colors.black,
-                      onPressed: () {
-                        _toggleCameraDirection();
-                      },
-                    ),
-                    Container(
-                      width: 30,
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.face_retouching_natural,
-                        color: Colors.white,
-                      ),
-                      iconSize: 40,
-                      color: Colors.black,
-                      onPressed: () {
-                        setState(() {
-                          register = true;
-                        });
-                      },
-                    )
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    ));
 
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Container(
-            margin: const EdgeInsets.only(top: 0),
-            color: Colors.black,
-            child: Stack(
-              children: stackChildren,
-            )),
+        body: Stack(
+          children: stackChildren,
+        ),
+        bottomNavigationBar: Container(
+          height: 60,
+          color: Colors.black,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+// Camera flip button
+              IconButton(
+                icon: Icon(Icons.cached, color: Colors.white),
+                iconSize: 30,
+                onPressed: _toggleCameraDirection,
+              ),
+
+              // Face registration button
+              IconButton(
+                icon: Icon(Icons.face_retouching_natural, color: Colors.white),
+                iconSize: 30,
+                onPressed: () => setState(() => register = true),
+              ),
+
+              // Add more navigation items as needed
+              IconButton(
+                icon: Icon(Icons.home, color: Colors.white),
+                onPressed: () => print('Home pressed'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
-  }
-}
-
-class FaceDetectorPainter extends CustomPainter {
-  FaceDetectorPainter(this.absoluteImageSize, this.faces, this.camDire2);
-
-  final Size absoluteImageSize;
-  final List<Recognition> faces;
-  CameraLensDirection camDire2;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double scaleX = size.width / absoluteImageSize.width;
-    final double scaleY = size.height / absoluteImageSize.height;
-
-    final Paint paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..color = Colors.indigoAccent;
-
-    for (Recognition face in faces) {
-      canvas.drawRect(
-        Rect.fromLTRB(
-          camDire2 == CameraLensDirection.front
-              ? (absoluteImageSize.width - face.location.right) * scaleX
-              : face.location.left * scaleX,
-          face.location.top * scaleY,
-          camDire2 == CameraLensDirection.front
-              ? (absoluteImageSize.width - face.location.left) * scaleX
-              : face.location.right * scaleX,
-          face.location.bottom * scaleY,
-        ),
-        paint,
-      );
-
-      TextSpan span = TextSpan(
-          style: const TextStyle(color: Colors.white, fontSize: 20),
-          text: "${face.name}  ${face.distance.toStringAsFixed(2)}");
-      TextPainter tp = TextPainter(
-          text: span,
-          textAlign: TextAlign.left,
-          textDirection: TextDirection.ltr);
-      tp.layout();
-      tp.paint(canvas,
-          Offset(face.location.left * scaleX, face.location.top * scaleY));
-    }
-  }
-
-  @override
-  bool shouldRepaint(FaceDetectorPainter oldDelegate) {
-    return true;
   }
 }

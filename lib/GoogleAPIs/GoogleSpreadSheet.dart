@@ -1,25 +1,10 @@
+import 'dart:convert';
+
 import 'package:gsheets/gsheets.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class GoogleSheets {
-  static const String credentials = r'''
-  
- {
-  "type": "service_account",
-  "project_id": "bp-system-sheets",
-  "private_key_id": "d6c217b6341b2994669a5ea15364649a67485a29",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCu3yRC12WdPYln\nUh5xsvEvHzsp53mZFfX5EhjY8AptsViv6T5fTZgYTrZzXv6WLEYJMpmanuCxjfhI\no1wmvxvVX+1Q2e73/1oGknOOHCcMB5rBUhhuPwtMrPsS+mI6KlIgeHvRiwd8i1pB\nqObFWOc9+to91v/tfZpS6M1Srn3U0MOHKGcM+b3T0wHN3d5qRDv1N5muTpV24TbF\nZNRzBZ/DH8iBbB5iiA9TmNs+Kqoh5FVWx9tDEptNsEmFxvZZR9tEjKfAjOIeh3yL\nWzajuGz/d0yTdR6E41DimQKwkHTRPyLPF6UuKCZ4mLpwl4j0HH+B8JnIucemvM6o\ncZMX2tO/AgMBAAECggEATQEP26s0INCnP+smYtT0Zdav290Fa8cC4KH6dRUG0pTk\nw9nG0Hq/vfxzVUyAeSqX0JcKks7hjO5CZeIhwyImpIgwXYkKNQSp5Pj6j5qQCzkS\nCY0YGvwCAsqtaQb+2DQopAnKJFS/gDVxEjbJIB/s/BsJnW+elTrZCSdguscBvANS\nxadzcdrdqvQWbfGw3KiQQ2Mi4+4Dl1dSXG8udnaoucc8RKvbk+r67CcYDY5njX8f\nji/IxmX8KfVlfi/5mPBAmTLycs55s4WQQsoT/ot319iEMb5VlYVWofodkVZFmH9j\nDaW2gW9tTui1U2JG/Rj1R7w4pOwap/kN9p3HLX7CKQKBgQDpksALyHqjgMoPDc3W\nYg+aBqbKhpO9i0EHEKGnb/zPJ9rzEM4lAmz32DQ6xPsSV+pqNqgkgpIRXgPlfzYU\nS6AHHMN3B6qmd1IX+pUVkqFzK3q0q5VHwixbLghO9X0nsKT367vmfgWfFKOS+vft\n2wJqey2mJEFRN3/au1ApWxuqWwKBgQC/qYBXkNXKrQEBbBCS/2JjbeRy319NSSQ/\nUhs6O3yRMdvHBpxklsDcNy+dFn7BFUGKR/fXIOJy4/6cAOlBR//mvE2vvDzOsbWK\nh3Bedt5FVTQGsJijvxQQwhqsH+I2GdxSCMbyNTSA0rnjBWUJv3/O42zOCckFdxvm\nr2tTXy3RbQKBgGriUquRtD055Dz7TiQ6f3U2cgDfkJ/+J2W6QJ9EaeXKETGFkS/y\najcIYu450cLVJFoyZMNAVONJqHLOwcqLyNE4YmIHyhmfJJwAeVSD4wm27dHbataJ\njo6zA+5N/FW7SeKBp1yUcrIXWbsayXW48OQVNhB/KrylrwZDDS2/mWtdAoGAdmaZ\n+H5q9Gfn5R8DJixKda4foK9JSo9SqyNn2pOBIpkwckUtPB69Sc11xo9tAo7FDE3l\nV6ri+aLLWUhe0ItQFRRi0Ztx3SZ/RfLhghnguegm2bMiuJWEKc4feBHCRzW2m578\neAhSRPrpBswAXQNGS2LHhokY/B1WyS25GaoEvgkCgYAFjeswEyKHlv+AMEWoRdiS\n9xQ4zrN9+wrWipqOsBKJWQwoT712YwK7DC5ZpvwwFdG4nEdiOnFVm2SctmKAlcH9\nQNHjWywtGf21epb/S114Ppw+PReG6aQp+N+dFceJpu4Z1RHmlBdcyDfbh+JBfHoB\njDJ5r5XF+jEX4sYhTwotwQ==\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-fbsvc@bp-system-sheets.iam.gserviceaccount.com",
-  "client_id": "117366191066821920697",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40bp-system-sheets.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-
-  ''';
-
   // Spreadsheet IDs for different sets of data
   static const String accountDetailsSpreadsheetID =
       '1JlYVQyRRH2XGVRNFpgPSsKhg6UTg7MGjhmC7cNPf3K0'; //each one with a sheet
@@ -29,9 +14,12 @@ class GoogleSheets {
       '1JwVFyzsXhf_VX1vDDi5N2v5QfP_tgajd0lDv8-G6a0M';
 
   // GSheets instances for each spreadsheet
-  static final gsheetsAccountDetails = GSheets(credentials);
-  static final gsheetsReportList = GSheets(credentials);
-  static final gsheetsDataList = GSheets(credentials);
+  static final gsheetsAccountDetails =
+      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
+  static final gsheetsReportList =
+      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
+  static final gsheetsDataList =
+      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
 
   // Worksheet variables for PB Account Details
   static Worksheet? accountsPage;
