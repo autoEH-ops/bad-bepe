@@ -1,3 +1,4 @@
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_taking_screen.dart';
 import 'package:flutter/material.dart';
 import '../Login/LoginPage.dart';
 import '../ManageQrCodeGeneration/ManageQrCodeMenu.dart';
@@ -10,7 +11,6 @@ import '../SubmitRoundingReport/RoundingReport.dart';
 import '../SubmitSpotCheckReport/SpotCheckReport.dart';
 import '../SubmitVmsReport/SubmitVmsReportMenu.dart';
 import 'package:flutter/material.dart';
-
 
 class SecurityMainMenu extends StatefulWidget {
   const SecurityMainMenu(
@@ -35,6 +35,7 @@ class _SecurityMainMenuState extends State<SecurityMainMenu>
     'VMS',
     'QR',
     'Key Management System',
+    'Taking Attendance',
   ];
 
   @override
@@ -77,11 +78,11 @@ class _SecurityMainMenuState extends State<SecurityMainMenu>
         backgroundColor: const Color(0xFF0091EA),
         leading: widget.role == "Super Admin"
             ? IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        )
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
             : null,
       ),
       backgroundColor: const Color(0xFF1f293a),
@@ -257,6 +258,8 @@ class _SecurityMainMenuState extends State<SecurityMainMenu>
       navigateToGenerateVisitorPass();
     } else if (menu == "Key Management System") {
       navigateToKeyManagementReport();
+    } else if (menu == "Taking Attendance") {
+      navigateToTakingAttendance();
     }
   }
 
@@ -324,11 +327,16 @@ class _SecurityMainMenuState extends State<SecurityMainMenu>
                 email: widget.email!, role: "Security")));
   }
 
+  void navigateToTakingAttendance() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => AttendanceTakingScreen()));
+  }
+
   void navigateToLoginPage() {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
-          (Route<dynamic> route) => false,
+      (Route<dynamic> route) => false,
     );
   }
 }

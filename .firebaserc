@@ -18,7 +18,8 @@
     "m1": "testing-projects-27380",
     "b5": "security-management-2e618",
     "v4": "security-management-2e618",
-    "v2": "bp-security-3df47"
+    "v2": "bp-security-3df47",
+    "face-recognition": "bp-system-sheets"
   },
   "targets": {},
   "etags": {},

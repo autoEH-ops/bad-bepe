@@ -17,16 +17,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 late List<CameraDescription> cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: FirebaseOptions(
-        apiKey: "AIzaSyCSkckYyBnKmMVAFN40vqKUpf1NLHL4NQs",
-        authDomain: "pb-security-system-b3f0a.firebaseapp.com",
-        projectId: "pb-security-system-b3f0a",
-        storageBucket: "pb-security-system-b3f0a.firebasestorage.app",
-        messagingSenderId: "1013021365519",
-        appId: "1:1013021365519:web:6b08ef5145b03af50a1a7a",
-        measurementId: "G-Y9F9SLNVPV"),
-  );
 
   try {
     await dotenv.load(fileName: ".env");
@@ -34,6 +24,22 @@ void main() async {
   } catch (e) {
     throw ".env is not initialized: $e";
   }
+  try {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY']!,
+        authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN']!,
+        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET']!,
+        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_ID']!,
+        appId: dotenv.env['FIREBASE_APP_ID']!,
+      ),
+    );
+    debugPrint("Firebase is initialized");
+  } catch (e) {
+    throw "Firebase is not initialized: $e";
+  }
+
   try {
     await Supabase.initialize(
       url: dotenv.env['SUPABASE_URL']!,
@@ -81,10 +87,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: AttendanceAdminPage(),
-          // RealtimeRecognitionScreen(),
-          // FaceRecognitionScreen(),
-          // LoadingScreen(),
+          home: LoadingScreen(),
         );
       },
     );

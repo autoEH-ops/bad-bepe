@@ -9,9 +9,8 @@ class SupabaseDbHelper {
   // Inserts a row in the database where each key in the Map is a column name
   // and the value is the column value. The return value is the id of the
   // inserted row.
-  Future<Map<String, dynamic>> insert(
-      String table, Map<String, dynamic> row) async {
-    return await supabase.from(table).insert(row);
+  Future<void> insert(String table, Map<String, dynamic> row) async {
+    await supabase.from(table).insert(row);
   }
 
   // All of the rows are returned as a list of maps, where each map is

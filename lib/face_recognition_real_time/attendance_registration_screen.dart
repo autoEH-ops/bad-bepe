@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/DB/SupabaseDbHelper.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/Recognizer.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_admin_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,11 +26,16 @@ class _AttendanceRegistrationScreenState
   late CameraController controller;
   bool isBusy = false;
   bool isRegistrationComplete = false;
+  bool attendanceDialogShown = false;
+  bool hasRecognizedFace = false;
+
   late Size size;
   late CameraDescription description = cameras[1];
   CameraLensDirection camDirec = CameraLensDirection.front;
   late List<Recognition> recognitions = [];
+  late List<Recognition> databaseFaces = [];
   late List<Face> faces = [];
+  final dbHelper = SupabaseDbHelper();
 
   //TODO declare face detector
   late FaceDetector detector;
@@ -117,6 +124,7 @@ class _AttendanceRegistrationScreenState
   bool register = false;
   // TODO perform Face Recognition
   performFaceRecognition(List<Face> faces) async {
+    if (hasRecognizedFace) return;
     recognitions.clear();
 
     //TODO convert CameraImage to Image and rotate it so that our frame will be in a portrait
@@ -137,14 +145,16 @@ class _AttendanceRegistrationScreenState
       Recognition recognition =
           recognizer.recognize(croppedFace, face.boundingBox);
       if (recognition.distance > 1) {
-        recognition.name = "Not Available";
+        recognition.name = "Unknown";
       }
       recognitions.add(recognition);
+      hasRecognizedFace = true;
+
+      await controller.stopImageStream();
+      await Future.delayed(Duration(milliseconds: 500));
       //TODO show face registration dialogue
-      if (register) {
-        showFaceRegistrationDialogue(croppedFace, recognition);
-        register = false;
-      }
+      showFaceRegistrationDialogue(croppedFace, recognition);
+      break;
     }
 
     setState(() {
@@ -191,15 +201,6 @@ class _AttendanceRegistrationScreenState
                     recognizer.registerFaceInDB(
                         textEditingController.text, recognition.embeddings);
                     textEditingController.text = "";
-
-                    Future.delayed(Duration.zero, () {
-                      if (mounted && Navigator.of(context).canPop()) {
-                        Navigator.of(context).pop(); // close dialog
-                        if (Navigator.of(context).canPop()) {
-                          Navigator.of(context).pop(); // close screen if needed
-                        }
-                      }
-                    });
 
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Face Registered"),
@@ -420,17 +421,19 @@ class _AttendanceRegistrationScreenState
                 onPressed: _toggleCameraDirection,
               ),
 
-              // Face registration button
-              IconButton(
-                icon: Icon(Icons.face_retouching_natural, color: Colors.white),
-                iconSize: 30,
-                onPressed: () => setState(() => register = true),
-              ),
-
               // Add more navigation items as needed
               IconButton(
                 icon: Icon(Icons.home, color: Colors.white),
-                onPressed: () => print('Home pressed'),
+                onPressed: () {
+                  controller.stopImageStream();
+                  controller.dispose();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            const AttendanceAdminPage()), // Your register page
+                  );
+                },
               ),
             ],
           ),

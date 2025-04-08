@@ -1,6 +1,7 @@
 import 'package:created_by_618_abdo/SubmitShutterReport/ShutterReportService.dart';
 import 'package:created_by_618_abdo/UserMenuPages/ReportMenu.dart';
 import 'package:created_by_618_abdo/UserMenuPages/SecurityMenu.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_admin_page.dart';
 import 'package:flutter/material.dart';
 
 import '../Approve qr/ViewAllQrCode.dart';
@@ -110,11 +111,16 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
         'onTap': navigateToEmergencyLocationPage
       },
       {'icon': Icons.vpn_key, 'text': "Key", 'onTap': navigateToManageKeyPage},
+      {
+        'icon': Icons.person_search,
+        'text': "Attendance",
+        'onTap': navigateToAttendance
+      },
     ];
 
     List<Map<String, dynamic>> filteredMenuItems = menuItems
         .where((item) =>
-        item['text'].toLowerCase().contains(searchQuery.toLowerCase()))
+            item['text'].toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();
 
     return Scaffold(
@@ -183,7 +189,7 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
                     child: Center(
                       child: ListTile(
                         leading:
-                        Icon(item['icon'], color: Colors.white, size: 40),
+                            Icon(item['icon'], color: Colors.white, size: 40),
                         title: Text(
                           item['text'],
                           textAlign: TextAlign.center,
@@ -216,15 +222,15 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
                   style: TextStyle(fontSize: 20, color: Colors.white)),
             ),
           ),
-         Expanded(
+          Expanded(
             child: ListView(
               children: [
                 _buildDrawerTile(context, Icons.content_paste_go, "View Report",
                     navigateToViewRepMenu),
                 _buildDrawerTile(context, Icons.security_rounded,
                     "Switch to Security", navigateToSecurity),
-               // _buildDrawerTile(context, Icons.admin_panel_settings_outlined,
-                  //  "User Settings", navigateToUserSettingsPage),
+                // _buildDrawerTile(context, Icons.admin_panel_settings_outlined,
+                //  "User Settings", navigateToUserSettingsPage),
               ],
             ),
           ),
@@ -233,7 +239,7 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
             child: Center(
               child: ListTile(
                 leading:
-                const Icon(Icons.exit_to_app_rounded, color: Colors.white),
+                    const Icon(Icons.exit_to_app_rounded, color: Colors.white),
                 title: const Text("Log Out",
                     style: TextStyle(fontSize: 20, color: Colors.white)),
                 onTap: navigateToLoginPage,
@@ -271,13 +277,16 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
                 ManageAccountPage(email: widget.email!, role: widget.role)));
   }
 
-
-
   void navigateToPendingList() {
     Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => ManagePendingPage(email: widget.email!)));
+  }
+
+  void navigateToAttendance() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => AttendanceAdminPage()));
   }
 
   void navigateToRegisterPage() {
@@ -295,10 +304,14 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
             builder: (context) => const ManageSecurityPersonnelPage()));
   }
 
-
   void navigateToVMSMENU() {
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => VMSMENU(email: '', role: '',)));
+        context,
+        MaterialPageRoute(
+            builder: (context) => VMSMENU(
+                  email: '',
+                  role: '',
+                )));
   }
 
   void navigateToRoundingPointPage() {
@@ -317,7 +330,8 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
     Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => QrvvMenuPage(role: "Super Admin", email: widget.email!)));
+            builder: (context) =>
+                QrvvMenuPage(role: "Super Admin", email: widget.email!)));
   }
 
   void navigateToManageKeyPage() {
@@ -339,7 +353,8 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
                   email: widget.email!, name: name!, role: "Super Admin")));
     }
   }
- /* void navigateToUserSettingsPage() {
+
+  /* void navigateToUserSettingsPage() {
     if (name != null && widget.email != null) {
       Navigator.push(
           context,
@@ -352,7 +367,7 @@ class _SuperAdminMainMenuState extends State<SuperAdminMainMenu>
     Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
-            (Route<dynamic> route) => false);
+        (Route<dynamic> route) => false);
   }
 }
 
@@ -397,7 +412,7 @@ class MenuSearch extends SearchDelegate {
           return ListTile(
             leading: Icon(item['icon'], color: Colors.white),
             title:
-            Text(item['text'], style: const TextStyle(color: Colors.white)),
+                Text(item['text'], style: const TextStyle(color: Colors.white)),
             onTap: item['onTap'],
           );
         }).toList(),
@@ -419,7 +434,7 @@ class MenuSearch extends SearchDelegate {
           return ListTile(
             leading: Icon(item['icon'], color: Colors.white),
             title:
-            Text(item['text'], style: const TextStyle(color: Colors.white)),
+                Text(item['text'], style: const TextStyle(color: Colors.white)),
             onTap: () {
               query = item['text'];
               showResults(context);
@@ -429,5 +444,4 @@ class MenuSearch extends SearchDelegate {
       ),
     );
   }
-
 }

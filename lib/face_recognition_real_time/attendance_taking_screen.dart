@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/DB/SupabaseDbHelper.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/Recognizer.dart';
+import 'package:created_by_618_abdo/face_recognition_real_time/attendance_admin_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ class _AttendanceTakingScreenState extends State<AttendanceTakingScreen> {
   bool isBusy = false;
   bool isRegistrationComplete = false;
   bool attendanceDialogShown = false;
+  bool hasRecognizedFace = false;
 
   late Size size;
   late CameraDescription description = cameras[1];
@@ -119,6 +121,7 @@ class _AttendanceTakingScreenState extends State<AttendanceTakingScreen> {
   bool register = false;
   // TODO perform Face Recognition
   performFaceRecognition(List<Face> faces) async {
+    if (hasRecognizedFace) return;
     recognitions.clear();
 
     //TODO convert CameraImage to Image and rotate it so that our frame will be in a portrait
@@ -143,10 +146,15 @@ class _AttendanceTakingScreenState extends State<AttendanceTakingScreen> {
       }
       //TODO show face registration dialogue
       // 👉 Show Attendance Dialog if face is known
-      if (recognition.name != "Not Available" ||
-          recognition.name != "Unknown") {
+      if (recognition.name != "Unknown") {
         recognitions.add(recognition);
+        hasRecognizedFace = true;
+
+        await controller.stopImageStream();
+        await Future.delayed(Duration(milliseconds: 500));
+
         showAttendanceConfirmationDialog(recognition.name);
+        break;
       }
     }
 
@@ -175,16 +183,20 @@ class _AttendanceTakingScreenState extends State<AttendanceTakingScreen> {
                 print("Attendance marked for $name");
                 String table = "attendance";
                 DateTime attendanceTime = DateTime.now().toUtc();
-// row to insert
-                Map<String, dynamic> row = {
-                  'name': name,
-                  'attendance_time': attendanceTime,
-                };
-                await dbHelper.insert(table, row);
+                try {
+                  Map<String, dynamic> row = {
+                    'name': name,
+                    'attendance_time': attendanceTime.toIso8601String(),
+                  };
+                  await dbHelper.insert(table, row);
+                } catch (e) {
+                  debugPrint("Attendance Data is not Saved: $e");
+                }
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Attendance marked for $name")),
                 );
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -399,7 +411,16 @@ class _AttendanceTakingScreenState extends State<AttendanceTakingScreen> {
               // Add more navigation items as needed
               IconButton(
                 icon: Icon(Icons.home, color: Colors.white),
-                onPressed: () => print('Home pressed'),
+                onPressed: () {
+                  controller.stopImageStream();
+                  controller.dispose();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) =>
+                            const AttendanceAdminPage()), // Your register page
+                  );
+                },
               ),
             ],
           ),

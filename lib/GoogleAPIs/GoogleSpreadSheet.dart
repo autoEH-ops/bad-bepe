@@ -13,13 +13,11 @@ class GoogleSheets {
   static const String dataListSpreadsheetID =
       '1JwVFyzsXhf_VX1vDDi5N2v5QfP_tgajd0lDv8-G6a0M';
 
+  static const credentials = '';
   // GSheets instances for each spreadsheet
-  static final gsheetsAccountDetails =
-      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
-  static final gsheetsReportList =
-      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
-  static final gsheetsDataList =
-      GSheets(jsonDecode(dotenv.env['GOOGLE_SPREADSHEET_CREDENTIALS']!));
+  static final gsheetsAccountDetails = GSheets(credentials);
+  static final gsheetsReportList = GSheets(credentials);
+  static final gsheetsDataList = GSheets(credentials);
 
   // Worksheet variables for PB Account Details
   static Worksheet? accountsPage;
