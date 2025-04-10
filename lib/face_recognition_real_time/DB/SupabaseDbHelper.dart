@@ -44,4 +44,11 @@ class SupabaseDbHelper {
   Future<int> delete(String table, int id) async {
     return await supabase.from(table).delete().eq('id', 1);
   }
+
+  Future<bool> checkIfNameExists(String table, String name) async {
+    final result =
+        await supabase.from(table).select().eq('name', name).maybeSingle();
+
+    return result != null;
+  }
 }

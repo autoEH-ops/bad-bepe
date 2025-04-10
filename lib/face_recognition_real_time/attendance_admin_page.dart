@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:created_by_618_abdo/UserMenuPages/SuperAdminMainMenu.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/attendance_registration_screen.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/attendance_taking_screen.dart';
 import 'package:created_by_618_abdo/face_recognition_real_time/model/Attendance.dart';
@@ -67,7 +68,20 @@ class _AttendanceAdminPageState extends State<AttendanceAdminPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Attendance Page")),
+      appBar: AppBar(
+        title: Text("Attendance Page"),
+        leading: IconButton(
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => SuperAdminMainMenu(
+                            email: "629@automattor.com",
+                            role: "Super Admin",
+                          )));
+            },
+            icon: Icon(Icons.arrow_back)),
+      ),
       body: Column(
         children: [
           // 🔘 Buttons

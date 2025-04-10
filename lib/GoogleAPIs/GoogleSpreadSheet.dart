@@ -13,7 +13,9 @@ class GoogleSheets {
   static const String dataListSpreadsheetID =
       '1JwVFyzsXhf_VX1vDDi5N2v5QfP_tgajd0lDv8-G6a0M';
 
-  static const credentials = '';
+  static const credentials = r'''
+   
+  ''';
   // GSheets instances for each spreadsheet
   static final gsheetsAccountDetails = GSheets(credentials);
   static final gsheetsReportList = GSheets(credentials);

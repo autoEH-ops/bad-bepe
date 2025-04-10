@@ -168,11 +168,12 @@ class _AttendanceRegistrationScreenState
   showFaceRegistrationDialogue(img.Image croppedFace, Recognition recognition) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         title: const Text("Face Registration", textAlign: TextAlign.center),
         alignment: Alignment.center,
         content: SizedBox(
-          height: 340,
+          height: 440,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -197,19 +198,43 @@ class _AttendanceRegistrationScreenState
                 height: 10,
               ),
               ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    String enteredName = textEditingController.text.trim();
+
+                    if (enteredName.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text("Name cannot be empty."),
+                        backgroundColor: Colors.red,
+                      ));
+                      return;
+                    }
+
                     recognizer.registerFaceInDB(
                         textEditingController.text, recognition.embeddings);
                     textEditingController.text = "";
+                    Navigator.of(context).pop();
 
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text("Face Registered"),
                     ));
+                    Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       minimumSize: const Size(200, 40)),
-                  child: const Text("Register"))
+                  child: const Text("Register")),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close dialog
+                  Navigator.of(context).pop(); // Go back to previous screen
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey,
+                  minimumSize: const Size(200, 40),
+                ),
+                child: const Text("Cancel"),
+              ),
             ],
           ),
         ),
